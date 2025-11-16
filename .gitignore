@@ -1,0 +1,29 @@
+# Node modules
+node_modules/
+
+# Build outputs
+backend/dist/
+frontend/dist/
+
+# Environment files
+.env
+*.env.local
+
+# Configuration (keep examples)
+config.yaml
+config.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

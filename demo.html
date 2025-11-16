@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embeddable Chat Widget Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .code-block code {
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 14px;
+        }
+
+        .content-section {
+            margin: 40px 0;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .demo-controls {
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Embeddable Chat Widget Demo</h1>
+
+    <div class="info-box">
+        <strong>👋 Welcome!</strong><br>
+        This page demonstrates the embeddable chat widget. Click the chat icon in the bottom-right corner to start chatting!
+    </div>
+
+    <div class="content-section">
+        <h2>About This Demo</h2>
+        <p>
+            This is a simple demonstration of the embeddable LLM chat agent. The widget is loaded via a script tag
+            and initialized with a base URL pointing to the backend server.
+        </p>
+    </div>
+
+    <div class="content-section">
+        <h2>How It Works</h2>
+        <ol>
+            <li>The widget script is loaded from the backend server</li>
+            <li>It's initialized with the API endpoint URL</li>
+            <li>User messages are sent to the backend via POST requests</li>
+            <li>Responses stream back in real-time using Server-Sent Events (SSE)</li>
+            <li>If MCP servers are configured, the agent can use tools</li>
+        </ol>
+    </div>
+
+    <div class="content-section">
+        <h2>Integration Code</h2>
+        <div class="code-block">
+            <code>&lt;!-- Add this to your HTML page --&gt;
+&lt;script src="http://localhost:3000/widget.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    EmbedChat.init({
+        baseURL: 'http://localhost:3000'
+    });
+&lt;/script&gt;</code>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>Demo Controls</h2>
+        <div class="demo-controls">
+            <button onclick="EmbedChat.open()">Open Chat</button>
+            <button onclick="EmbedChat.close()">Close Chat</button>
+        </div>
+        <p><small>You can also click the floating button in the bottom-right corner.</small></p>
+    </div>
+
+    <div class="content-section">
+        <h2>Features</h2>
+        <ul>
+            <li>✅ Real-time streaming responses</li>
+            <li>✅ Conversation history maintained</li>
+            <li>✅ Beautiful, responsive UI</li>
+            <li>✅ Easy to embed in any website</li>
+            <li>✅ MCP tool integration support</li>
+            <li>✅ Works with any OpenAI-compatible API</li>
+            <li>✅ Customizable system prompts</li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <strong>🔧 Configuration</strong><br>
+        Make sure you've:
+        <ol>
+            <li>Configured <code>config.yaml</code> with your LLM settings</li>
+            <li>Set your API key in <code>backend/.env</code></li>
+            <li>Built the frontend: <code>cd frontend && npm run build</code></li>
+            <li>Started the backend: <code>cd backend && npm run dev</code></li>
+        </ol>
+    </div>
+
+    <!-- Embed the chat widget -->
+    <script src="http://localhost:3000/widget.js"></script>
+    <script>
+        // Initialize the widget
+        EmbedChat.init({
+            baseURL: 'http://localhost:3000'
+        });
+
+        // You can also programmatically control the widget:
+        // EmbedChat.open();  // Open the chat
+        // EmbedChat.close(); // Close the chat
+    </script>
+</body>
+</html>
