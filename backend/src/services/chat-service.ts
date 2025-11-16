@@ -11,7 +11,7 @@ export class ChatService {
   async *processMessage(
     userMessage: string,
     conversationHistory: ChatMessage[] = []
-  ): AsyncGenerator<string, void, unknown> {
+  ): AsyncGenerator<string | { type: 'tool'; data: any }, void, unknown> {
     const messages: ChatMessage[] = [
       { role: 'system', content: this.systemPrompt },
       ...conversationHistory,
@@ -51,8 +51,9 @@ export class ChatService {
 
         // Execute each tool and add results
         for (const toolCall of toolCalls) {
+          let args: any = {};
           try {
-            const args = JSON.parse(toolCall.function.arguments);
+            args = JSON.parse(toolCall.function.arguments);
             const result = await this.mcpManager.executeTool(toolCall.function.name, args);
 
             // Format tool result
@@ -65,16 +66,37 @@ export class ChatService {
               content: toolResultContent,
             });
 
-            // Notify user about tool execution
-            yield `\n\n[Tool: ${toolCall.function.name}]\n`;
+            // Send tool execution info to frontend
+            yield {
+              type: 'tool',
+              data: {
+                name: toolCall.function.name,
+                arguments: args,
+                result: result.content || result,
+                status: 'success',
+              },
+            };
           } catch (error) {
             console.error(`Tool execution error:`, error);
+            const errorMessage = (error as Error).message;
+
             currentMessages.push({
               role: 'tool',
               tool_call_id: toolCall.id,
               name: toolCall.function.name,
-              content: `Error: ${(error as Error).message}`,
+              content: `Error: ${errorMessage}`,
             });
+
+            // Send tool error info to frontend
+            yield {
+              type: 'tool',
+              data: {
+                name: toolCall.function.name,
+                arguments: args,
+                error: errorMessage,
+                status: 'error',
+              },
+            };
           }
         }
       }

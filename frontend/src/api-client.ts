@@ -3,8 +3,17 @@ export interface Message {
   content: string;
 }
 
+export interface ToolCallData {
+  name: string;
+  arguments: any;
+  result?: any;
+  error?: string;
+  status: 'success' | 'error';
+}
+
 export interface StreamCallbacks {
   onContent: (content: string) => void;
+  onTool: (toolData: ToolCallData) => void;
   onDone: () => void;
   onError: (error: string) => void;
 }
@@ -67,6 +76,14 @@ export class APIClient {
 
               if (parsed.type === 'content') {
                 callbacks.onContent(parsed.content);
+              } else if (parsed.type === 'tool') {
+                callbacks.onTool({
+                  name: parsed.name,
+                  arguments: parsed.arguments,
+                  result: parsed.result,
+                  error: parsed.error,
+                  status: parsed.status,
+                });
               } else if (parsed.type === 'done') {
                 callbacks.onDone();
               } else if (parsed.type === 'error') {

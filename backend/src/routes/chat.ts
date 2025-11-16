@@ -24,8 +24,13 @@ export function createChatRouter(chatService: ChatService): Router {
     try {
       // Stream the response
       for await (const chunk of chatService.processMessage(message, conversationHistory)) {
-        // Send each chunk as an SSE event
-        res.write(`data: ${JSON.stringify({ type: 'content', content: chunk })}\n\n`);
+        if (typeof chunk === 'string') {
+          // Regular content chunk
+          res.write(`data: ${JSON.stringify({ type: 'content', content: chunk })}\n\n`);
+        } else if (chunk.type === 'tool') {
+          // Tool execution info
+          res.write(`data: ${JSON.stringify({ type: 'tool', ...chunk.data })}\n\n`);
+        }
       }
 
       // Send completion event

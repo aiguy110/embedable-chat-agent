@@ -1,4 +1,4 @@
-import { APIClient, Message } from './api-client';
+import { APIClient, Message, ToolCallData } from './api-client';
 import { ChatUI } from './ui';
 
 interface EmbedChatConfig {
@@ -45,40 +45,62 @@ class EmbedChatWidget {
 
     this.ui.clearInput();
 
-    // Create assistant message element
-    const assistantMessageEl = this.ui.addMessage('assistant', '');
+    // Track assistant message element and content
+    let assistantMessageEl: HTMLElement | null = null;
     let assistantContent = '';
+    let currentSegmentContent = '';
 
     try {
       await this.apiClient.sendMessage(userMessage, this.conversationHistory, {
         onContent: (content: string) => {
           assistantContent += content;
-          this.ui!.updateMessage(assistantMessageEl, assistantContent);
+          currentSegmentContent += content;
+
+          // Create assistant message element on first content
+          if (!assistantMessageEl) {
+            assistantMessageEl = this.ui!.addMessage('assistant', currentSegmentContent);
+          } else {
+            this.ui!.updateMessage(assistantMessageEl, currentSegmentContent);
+          }
+        },
+        onTool: (toolData: ToolCallData) => {
+          this.ui!.addToolCall(toolData);
+
+          // Reset for next segment - create new message element for content after tool
+          assistantMessageEl = null;
+          currentSegmentContent = '';
         },
         onDone: () => {
-          this.conversationHistory.push({
-            role: 'assistant',
-            content: assistantContent,
-          });
+          // Only add to history if we have content
+          if (assistantContent) {
+            this.conversationHistory.push({
+              role: 'assistant',
+              content: assistantContent,
+            });
+          }
           this.isProcessing = false;
           this.ui!.setInputDisabled(false);
         },
         onError: (error: string) => {
           console.error('Chat error:', error);
-          this.ui!.updateMessage(
-            assistantMessageEl,
-            `Error: ${error}`
-          );
+
+          if (!assistantMessageEl) {
+            assistantMessageEl = this.ui!.addMessage('assistant', `Error: ${error}`);
+          } else {
+            this.ui!.updateMessage(assistantMessageEl, `Error: ${error}`);
+          }
           this.isProcessing = false;
           this.ui!.setInputDisabled(false);
         },
       });
     } catch (error) {
       console.error('Unexpected error:', error);
-      this.ui.updateMessage(
-        assistantMessageEl,
-        `Error: ${(error as Error).message}`
-      );
+
+      if (!assistantMessageEl) {
+        this.ui.addMessage('assistant', `Error: ${(error as Error).message}`);
+      } else {
+        this.ui.updateMessage(assistantMessageEl, `Error: ${(error as Error).message}`);
+      }
       this.isProcessing = false;
       this.ui.setInputDisabled(false);
     }

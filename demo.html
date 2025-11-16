@@ -104,6 +104,28 @@
     </div>
 
     <div class="content-section">
+        <h2>Developer Console Snippet</h2>
+        <p>Want to test the widget on an existing page? Copy and paste this into your browser's developer console:</p>
+        <div class="code-block">
+            <code>(function() {
+    const script = document.createElement('script');
+    script.src = 'http://localhost:3000/widget.js';
+    script.onload = function() {
+        EmbedChat.init({
+            baseURL: 'http://localhost:3000'
+        });
+        console.log('Chat widget loaded! Click the bubble in the bottom-right.');
+    };
+    script.onerror = function() {
+        console.error('Failed to load chat widget. Is the server running?');
+    };
+    document.head.appendChild(script);
+})();</code>
+        </div>
+        <p><small><strong>Try it:</strong> Open any website, press F12 to open DevTools, paste this code in the Console tab, and press Enter!</small></p>
+    </div>
+
+    <div class="content-section">
         <h2>Demo Controls</h2>
         <div class="demo-controls">
             <button onclick="EmbedChat.open()">Open Chat</button>
