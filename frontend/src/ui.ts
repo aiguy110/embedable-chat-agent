@@ -9,7 +9,9 @@ export class ChatUI {
   private input: HTMLTextAreaElement;
   private sendButton: HTMLButtonElement;
   private toggleButton: HTMLElement;
+  private expandButton: HTMLButtonElement;
   private isOpen: boolean = false;
+  private isExpanded: boolean = false;
 
   constructor(containerId: string = "embed-chat-widget") {
     this.container = this.createContainer(containerId);
@@ -18,6 +20,7 @@ export class ChatUI {
     this.inputContainer = this.createInputContainer();
     this.input = this.createInput();
     this.sendButton = this.createSendButton();
+    this.expandButton = this.createExpandButton();
 
     this.setupLayout();
     this.setupStyles();
@@ -147,6 +150,15 @@ export class ChatUI {
     return button;
   }
 
+  private createExpandButton(): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.className = "embed-chat-expand";
+    button.innerHTML = "⛶";
+    button.title = "Expand to fullscreen";
+    button.onclick = () => this.toggleExpand();
+    return button;
+  }
+
   private setupLayout(): void {
     this.inputContainer.appendChild(this.input);
     this.inputContainer.appendChild(this.sendButton);
@@ -155,11 +167,18 @@ export class ChatUI {
     header.className = "embed-chat-header";
     header.innerHTML = "<span>Chat Assistant</span>";
 
+    const headerButtons = document.createElement("div");
+    headerButtons.className = "embed-chat-header-buttons";
+
+    headerButtons.appendChild(this.expandButton);
+
     const closeButton = document.createElement("button");
     closeButton.className = "embed-chat-close";
     closeButton.innerHTML = "✕";
     closeButton.onclick = () => this.toggle();
-    header.appendChild(closeButton);
+    headerButtons.appendChild(closeButton);
+
+    header.appendChild(headerButtons);
 
     this.container.appendChild(header);
     this.container.appendChild(this.messagesContainer);
@@ -213,6 +232,18 @@ export class ChatUI {
         flex-direction: column;
         z-index: 9998;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        transform-origin: bottom right;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .embed-chat-container.expanded {
+        bottom: 0;
+        right: 0;
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
       }
 
       .embed-chat-header {
@@ -226,11 +257,22 @@ export class ChatUI {
         align-items: center;
       }
 
+      .embed-chat-container.expanded .embed-chat-header {
+        border-radius: 0;
+      }
+
+      .embed-chat-header-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .embed-chat-expand,
       .embed-chat-close {
         background: none;
         border: none;
         color: white;
-        font-size: 24px;
+        font-size: 20px;
         cursor: pointer;
         padding: 0;
         width: 30px;
@@ -242,6 +284,11 @@ export class ChatUI {
         transition: background 0.2s;
       }
 
+      .embed-chat-close {
+        font-size: 24px;
+      }
+
+      .embed-chat-expand:hover,
       .embed-chat-close:hover {
         background: rgba(255,255,255,0.1);
       }
@@ -606,6 +653,22 @@ export class ChatUI {
 
     if (this.isOpen) {
       this.input.focus();
+    }
+  }
+
+  private toggleExpand(): void {
+    this.isExpanded = !this.isExpanded;
+
+    if (this.isExpanded) {
+      this.container.classList.add("expanded");
+      this.toggleButton.style.display = "none";
+      this.expandButton.innerHTML = "⛶";
+      this.expandButton.title = "Exit fullscreen";
+    } else {
+      this.container.classList.remove("expanded");
+      this.toggleButton.style.display = "flex";
+      this.expandButton.innerHTML = "⛶";
+      this.expandButton.title = "Expand to fullscreen";
     }
   }
 
